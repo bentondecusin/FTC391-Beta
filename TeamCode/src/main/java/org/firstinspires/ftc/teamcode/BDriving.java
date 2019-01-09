@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name="B Driving ")
+@TeleOp(name="Beta-Driving")
 
 public class BDriving extends OpMode{
     private DcMotor left = null;

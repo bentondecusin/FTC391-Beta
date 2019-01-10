@@ -23,8 +23,8 @@ java
 
 ## Authors
 
-* **Chengyu Benton Li**  [bentondecusin](https://github.com/bentondecusin )
-
+* **Chengyu Benton Li '19'**  [bentondecusin](https://github.com/bentondecusin )
+* **Eric Margadonna '19'**  [eric082659](https://github.com/eric082659 )
 See also the list of [contributors](https://github.com/bentondecusin/ftc391-2018f/contributors) who participated in this project.
 
 ## License

@@ -21,7 +21,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 
-@Autonomous(name = "Far-1")
+@Autonomous(name = "Far-1",group = "Beta")
 
 public class BetaFar extends LinearOpMode {
     //preparation for these cool vuforia stuffs

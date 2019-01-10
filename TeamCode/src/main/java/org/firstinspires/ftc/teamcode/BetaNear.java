@@ -22,7 +22,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 
-@Autonomous(name = "Near-1")
+@Autonomous(name = "Near-1", group = "Beta")
 
 public class BetaNear extends LinearOpMode {
     //preparation for these cool vuforia stuffs
@@ -33,13 +33,16 @@ public class BetaNear extends LinearOpMode {
     private TFObjectDetector tfod;
     private static final String VUFORIA_KEY = "AUrb6t//////AAABmZ7sUnVME0wvu2pmOKRP5ilgE5gzg4vWVqHNhc0ef2FEwf9NlosWkTS81UmRvZ0UTHFjPeQYLKL6iY60ZJQcJFcMftURUv/1nA/9YELScRwzltxrUAFpfMA/VE9VTaNPTQQYUfm1Z1wUwY6fAJBwDvZJP+UBqPD0AJxz0Gf8jgcdCVgu4A7VtVdk1PRMTSUkHdOEm+VmXzpjxL9X4d/v81mx3aqJbVc6+qhUD53umiep/wCgl9WxHYY6ZEM2tuS7Eih3TexL24HLFvdEu79t24yTzCFz6du/hB12nfyySO78UWbdlusHuHIv0ZI5/IWh4RigF057FaLWc4F+EluGBkO0c6ygIaciN5fHPS9l7dtj";
     String goldLocation;
+    int goldMineralX = -1;
+    int silverMineral1X = -1;
+    int silverMineral2X = -1;
 
 
     //set up encoders
     static final double COUNTS_Per_REV    = 1140 ;
     static final double WHEEL_DIAMETER = 4 ; //in inches
     static final double COUNTS_Per_INCH = COUNTS_Per_REV/(WHEEL_DIAMETER*Math.PI);
-    static final double COUNTS_Per_DEGREE = (COUNTS_Per_REV/(WHEEL_DIAMETER/18))/360;
+    static final double COUNTS_Per_DEGREE = COUNTS_Per_REV/((130)/WHEEL_DIAMETER);
     //configure motors
     private DcMotor left = null;
     private DcMotor right = null;
@@ -51,7 +54,7 @@ public class BetaNear extends LinearOpMode {
     double checkpoint1 = 10;
 
     //set speed
-    static final double speed = .5 ;
+    static final double speed = .3 ;
 
     public void sample() {
         runTime.reset();
@@ -67,17 +70,17 @@ public class BetaNear extends LinearOpMode {
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                 if (updatedRecognitions != null) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    telemetry.addData("goldlocation",goldLocation );
+
                     if (updatedRecognitions.size() == 2) {
-                        int goldMineralX = -1;
-                        int silverMineral1X = -1;
-                        int silverMineral2X = -1;
+
                         for (Recognition recognition : updatedRecognitions) {
                             if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldMineralX = (int) recognition.getLeft();
+                                goldMineralX = (int) recognition.getRight();
                             } else if (silverMineral1X == -1) {
-                                silverMineral1X = (int) recognition.getLeft();
+                                silverMineral1X = (int) recognition.getTop();
                             } else {
-                                silverMineral2X = (int) recognition.getLeft();
+                                silverMineral2X = (int) recognition.getTop();
                             }
                         }
                         if (silverMineral1X != -1 && silverMineral2X != -1) {
@@ -85,14 +88,14 @@ public class BetaNear extends LinearOpMode {
                             goldLocation = "L";
                             break;
                         }
-                        if (silverMineral1X != -1 && goldMineralX != -1) {
+                        if (goldMineralX != -1) {
                             if (goldMineralX < silverMineral1X) {
                                 telemetry.addData("Gold Mineral Position", "Left");
                                 goldLocation = "C";
                                 break;
                             }
                         }
-                        if (silverMineral1X != -1 && goldMineralX != -1) {
+                        if (goldMineralX != -1) {
                             if (goldMineralX > silverMineral1X) {
                                 telemetry.addData("Gold Mineral Position", "Left");
                                 goldLocation = "R";
@@ -131,14 +134,15 @@ public class BetaNear extends LinearOpMode {
     private void configureMotors() {
 
         left = hardwareMap.get(DcMotor.class, "mot0");
-         right = hardwareMap.get(DcMotor.class, "mot1");
-         lift = hardwareMap.get(DcMotor.class,"mot2");
-         launch = hardwareMap.get(Servo.class,"ser");
+        right = hardwareMap.get(DcMotor.class, "mot1");
+        lift = hardwareMap.get(DcMotor.class,"mot2");
+        launch = hardwareMap.get(Servo.class,"ser");
         //set rotational direction
 
-         left.setDirection(DcMotor.Direction.REVERSE);
-         right.setDirection(DcMotor.Direction.FORWARD);
-         lift.setDirection(DcMotor.Direction.FORWARD);
+        left.setDirection(DcMotor.Direction.REVERSE);
+        right.setDirection(DcMotor.Direction.FORWARD);
+        lift.setDirection(DcMotor.Direction.FORWARD);
+        launch.setDirection(Servo.Direction.REVERSE);
 
 
         waitForStart();
@@ -159,6 +163,9 @@ public class BetaNear extends LinearOpMode {
         while (left.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());
+            telemetry.addData("goldlocation",goldLocation );
+            telemetry.addData("gold value",goldMineralX );
+            telemetry.addData("silver value",silverMineral1X );
             telemetry.update();
         }
         left.setPower(0);
@@ -193,8 +200,8 @@ public class BetaNear extends LinearOpMode {
         left.setTargetPosition((int)(dA * COUNTS_Per_DEGREE));
         right.setTargetPosition((int)(-dA * COUNTS_Per_DEGREE));
 
-        left.setPower(.5);//power depends on the the robot and case studies are needed
-        right.setPower(-.5);
+        left.setPower(speed);//power depends on the the robot and case studies are needed
+        right.setPower(-speed);
         while (left.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());
@@ -229,27 +236,28 @@ public class BetaNear extends LinearOpMode {
     private void bat(String location) {
 
         if (location == "L") {
-
+            moveForward(13);
             turnCounterClockwise(45);
-            moveForward(35);
+            moveForward(36);
             turnClockwise(90);
-            moveForward(34);
+            moveForward(36);
         }
         if (location == "R") {
-
+            moveForward(13);
             turnClockwise(45);
-            moveForward(35);
+            moveForward(36);
             turnCounterClockwise(90);
-            moveForward(34);
+            moveForward(36);
         }
         if (location == "C" ||location == "N") {
+            moveForward(13);
             moveForward(38);
 
         }
     }
 
     private void homeRun() {
-        launch.setPosition(220);
+        launch.setPosition(-.6);
     }
 
 
@@ -260,10 +268,9 @@ public class BetaNear extends LinearOpMode {
         bat(goldLocation);
         homeRun();
 
-        }
-
     }
 
+}
 
 
 

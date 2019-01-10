@@ -219,8 +219,8 @@ public class BetaNear extends LinearOpMode {
         left.setTargetPosition((int)(-dA * COUNTS_Per_DEGREE));
         right.setTargetPosition((int)(dA * COUNTS_Per_DEGREE));
 
-        left.setPower(-.5);//power depends on the the robot and case studies are needed
-        right.setPower(.5);
+        left.setPower(-speed);//power depends on the the robot and case studies are needed
+        right.setPower(speed);
         while (left.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());

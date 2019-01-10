@@ -13,9 +13,14 @@ public class BDriving extends OpMode{
     private DcMotor left = null;
     private DcMotor right = null;
     private DcMotor dick = null;
+    //set up encoders
+    static final double COUNTS_Per_REV    = 1140 ;
+    static final double WHEEL_DIAMETER = 4 ; //in inches
+    static final double COUNTS_Per_INCH = COUNTS_Per_REV/(WHEEL_DIAMETER*Math.PI);
+    static final double COUNTS_Per_DEGREE = COUNTS_Per_REV/((130)/WHEEL_DIAMETER);
 
     private int counter = 0;
-    private double speed = 1 ;
+    private double speed = .5 ;
 
     @Override
     public void init() {
@@ -44,15 +49,34 @@ public class BDriving extends OpMode{
         if (gamepad1.x == true){
             speed = speed + 0.1;
         }
+        if (gamepad1.y == true){
+            speed = speed + 0.1;
+        }
+        if (gamepad1.left_bumper){
+            liftUp();
+        }
     }
+
+    public void liftUp(){
+        dick.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        dick.setTargetPosition((int)(10 * COUNTS_Per_INCH));
+        dick.setPower(speed);
+        while (dick.isBusy()){
+            telemetry.addData("Climbing",100*dick.getCurrentPosition()/(10 * COUNTS_Per_INCH)+"%");
+            telemetry.update();
+        }
+        dick.setPower(0);
+    }
+
 
     @Override
     public void loop() {
         checkKeys();
-        left.setPower(speed*(-gamepad1.left_stick_x+gamepad1.left_stick_y));
-        right.setPower(speed*(-gamepad1.left_stick_x-gamepad1.left_stick_y));
-        dick.setPower(gamepad1.right_stick_y);
+        left.setPower(speed*(-gamepad1.left_stick_x+gamepad1.right_stick_y));
+        right.setPower(speed*(-gamepad1.left_stick_x-gamepad1.right_stick_y));
+        dick.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
         telemetry.addData("Speed:",speed);
+
         telemetry.update();
     }
 }

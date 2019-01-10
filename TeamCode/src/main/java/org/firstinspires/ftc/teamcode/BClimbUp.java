@@ -1,4 +1,8 @@
-
+/*
+ * Author: Benton Li '19
+ * Version: 1.0
+ *
+ * */
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;

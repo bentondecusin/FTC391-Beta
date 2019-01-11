@@ -22,9 +22,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 
-@Autonomous(name = "Near-1", group = "Beta")
+@Autonomous(name = "Far-Nuts", group = "Beta")
 
-public class BetaNear extends LinearOpMode {
+public class NutsFar extends LinearOpMode {
     //preparation for these cool vuforia stuffs
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
@@ -61,45 +61,57 @@ public class BetaNear extends LinearOpMode {
         initVuforia();
         initTfod();
         tfod.activate();
-        moveForward(5);
+
         goldLocation = "N";
-        while (opModeIsActive()&&goldLocation == "N" && runTime.time() < checkpoint1) {
-            if (tfod != null) {
-                // getUpdatedRecognitions() will return null if no new information is available since
-                // the last time that call was made.
-                List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
-                if (updatedRecognitions != null) {
-                    telemetry.addData("# Object Detected", updatedRecognitions.size());
-                    telemetry.addData("goldlocation",goldLocation );
+        lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-                    if (updatedRecognitions.size() == 2) {
+        lift.setTargetPosition(22*1160);
 
-                        for (Recognition recognition : updatedRecognitions) {
-                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldMineralX = (int) recognition.getLeft();
-                            } else if (silverMineral1X == -1) {
-                                silverMineral1X = (int) recognition.getLeft();
-                            } else {
-                                silverMineral2X = (int) recognition.getLeft();
+        lift.setPower(1);
+        while (opModeIsActive()&&lift.isBusy()) {
+            telemetry.addData("Gold Location",goldLocation );
+            while (opModeIsActive()&&goldLocation == "N"){
+                if (tfod != null) {
+                    // getUpdatedRecognitions() will return null if no new information is available since
+                    // the last time that call was made.
+                    List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
+                    if (updatedRecognitions != null) {
+                        telemetry.addData("# Object Detected", updatedRecognitions.size());
+                        telemetry.addData("goldlocation",goldLocation );
+
+                        if (updatedRecognitions.size() == 2) {
+
+                            for (Recognition recognition : updatedRecognitions) {
+                                if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                    goldMineralX = (int) recognition.getLeft();
+                                } else if (silverMineral1X == -1) {
+                                    silverMineral1X = (int) recognition.getLeft();
+                                } else {
+                                    silverMineral2X = (int) recognition.getLeft();
+                                }
                             }
-                        }
-                        if (silverMineral1X != -1 && silverMineral2X != -1) {
-                            telemetry.addData("Gold Mineral Position", "Left");
-                            goldLocation = "L";
-                            break;
-                        }
-                        if (goldMineralX != -1) {
-                            if (goldMineralX < silverMineral1X) {
-                                telemetry.addData("Gold Mineral Position", "Center");
-                                goldLocation = "C";
-                                break;
+                            if (silverMineral1X != -1 && silverMineral2X != -1) {
+                                telemetry.addData("Gold Mineral Position", "Left");
+                                goldLocation = "L";
+                                return;
+
                             }
-                        }
-                        if (goldMineralX != -1) {
-                            if (goldMineralX > silverMineral1X) {
-                                telemetry.addData("Gold Mineral Position", "Right");
-                                goldLocation = "R";
-                                break;
+                            if (goldMineralX != -1) {
+                                if (goldMineralX < silverMineral1X) {
+                                    telemetry.addData("Gold Mineral Position", "Center");
+                                    goldLocation = "C";
+                                    return;
+
+                                }
+                            }
+                            if (goldMineralX != -1) {
+                                if (goldMineralX > silverMineral1X) {
+                                    telemetry.addData("Gold Mineral Position", "Right");
+                                    goldLocation = "R";
+                                    return;
+
+                                }
                             }
                         }
 
@@ -221,7 +233,7 @@ public class BetaNear extends LinearOpMode {
 
         left.setPower(-.5);//power depends on the the robot and case studies are needed
         right.setPower(.5);
-        while (opModeIsActive()&&right.isBusy()){
+        while (opModeIsActive()&&left.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());
             telemetry.update();
@@ -234,31 +246,26 @@ public class BetaNear extends LinearOpMode {
     }
 
     private void bat(String location) {
+        lift.setPower(0);
 
         if (location == "L") {
 
-            turnCounterClockwise(45+2);
-            moveForward(32);
-            turnClockwise(90-25);
-            moveForward(34);
+            turnClockwise(135-30);
+            moveBackward(20);
         }
         if (location == "R") {
-
-            turnClockwise(45+2);
-            moveForward(32);
-            turnCounterClockwise(90-5);
-            moveForward(34);
+            turnClockwise(45);
+            moveForward(13);
         }
         if (location == "C" ||location == "N") {
-
-            moveForward(38);
+            turnClockwise(180-30);
+            moveBackward(13);
 
         }
     }
 
     private void homeRun() {
         launch.setPosition(-.6);
-        launch.setPosition(0);
     }
 
 

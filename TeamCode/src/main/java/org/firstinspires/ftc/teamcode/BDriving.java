@@ -1,11 +1,7 @@
-/*
- * Author: Benton Li '19
- * Version: 1.0
- *
- * */
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -15,6 +11,7 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 @TeleOp(name="Beta-Driving")
 
 public class BDriving extends OpMode{
+
     private DcMotor left = null;
     private DcMotor right = null;
     private DcMotor dick = null;
@@ -23,7 +20,7 @@ public class BDriving extends OpMode{
     static final double WHEEL_DIAMETER = 4 ; //in inches
     static final double COUNTS_Per_INCH = COUNTS_Per_REV/(WHEEL_DIAMETER*Math.PI);
     static final double COUNTS_Per_DEGREE = COUNTS_Per_REV/((130)/WHEEL_DIAMETER);
-
+    private String speedStatus ;
     private int counter = 0;
     private double speed = .5 ;
 
@@ -51,14 +48,20 @@ public class BDriving extends OpMode{
     public ElapsedTime runTime = new ElapsedTime();
 
     public void checkKeys(){
-        if (gamepad1.x == true){
-            speed = speed + 0.1;
+        if (gamepad1.b == true){
+            speed = 1 ;
+            speedStatus = "Maximum Overdrive~";
         }
-        if (gamepad1.y == true){
-            speed = speed + 0.1;
+        if (gamepad1.right_stick_button){
+            speed = .2;
+            speedStatus = "Slow Speed";
+        }
+        if(gamepad1.a == true){
+            speed = 0.5;
+            speedStatus = "Medium Speed";
         }
         if (gamepad1.left_bumper){
-            liftUp();
+            //   liftUp();
         }
     }
 
@@ -77,11 +80,12 @@ public class BDriving extends OpMode{
     @Override
     public void loop() {
         checkKeys();
-        left.setPower(speed*(-gamepad1.left_stick_x+gamepad1.right_stick_y));
-        right.setPower(speed*(-gamepad1.left_stick_x-gamepad1.right_stick_y));
+        left.setPower(speed*(gamepad1.right_stick_y-gamepad1.left_stick_x));
+        right.setPower(speed*(gamepad1.right_stick_y+gamepad1.left_stick_x));
         dick.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
         telemetry.addData("Speed:",speed);
-
+        telemetry.addData("Speed Status",speedStatus);
+        telemetry.addData("debug lift", dick.getCurrentPosition());
         telemetry.update();
     }
 }

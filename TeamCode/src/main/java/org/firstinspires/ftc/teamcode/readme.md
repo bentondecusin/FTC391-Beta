@@ -25,6 +25,8 @@ java
 
 * **Chengyu Benton Li '19'**  [bentondecusin](https://github.com/bentondecusin )
 * **Eric Margadonna '19'**  [eric082659](https://github.com/eric082659 )
+* **Xiqiang Liu '19'**  [endersodium](https://github.com/endersodium )
+
 See also the list of [contributors](https://github.com/bentondecusin/ftc391-2018f/contributors) who participated in this project.
 
 ## License

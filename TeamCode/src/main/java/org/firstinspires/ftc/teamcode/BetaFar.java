@@ -3,9 +3,11 @@
  * Version: 1.0
  *
  * */
+
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -20,8 +22,8 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.List;
 
-
-@Autonomous(name = "Far-1",group = "Beta")
+@Disabled
+@Autonomous(name = "Far-1", group = "Beta")
 
 public class BetaFar extends LinearOpMode {
     //preparation for these cool vuforia stuffs
@@ -32,32 +34,35 @@ public class BetaFar extends LinearOpMode {
     private TFObjectDetector tfod;
     private static final String VUFORIA_KEY = "AUrb6t//////AAABmZ7sUnVME0wvu2pmOKRP5ilgE5gzg4vWVqHNhc0ef2FEwf9NlosWkTS81UmRvZ0UTHFjPeQYLKL6iY60ZJQcJFcMftURUv/1nA/9YELScRwzltxrUAFpfMA/VE9VTaNPTQQYUfm1Z1wUwY6fAJBwDvZJP+UBqPD0AJxz0Gf8jgcdCVgu4A7VtVdk1PRMTSUkHdOEm+VmXzpjxL9X4d/v81mx3aqJbVc6+qhUD53umiep/wCgl9WxHYY6ZEM2tuS7Eih3TexL24HLFvdEu79t24yTzCFz6du/hB12nfyySO78UWbdlusHuHIv0ZI5/IWh4RigF057FaLWc4F+EluGBkO0c6ygIaciN5fHPS9l7dtj";
     String goldLocation;
+    int goldMineralX = -1;
+    int silverMineral1X = -1;
+    int silverMineral2X = -1;
 
+
+    //set up encoders
+    static final double COUNTS_Per_REV    = 1160 ;
+    static final double WHEEL_DIAMETER = 4 ; //in inches
+    static final double COUNTS_Per_INCH = COUNTS_Per_REV/(WHEEL_DIAMETER*Math.PI);
+    static final double COUNTS_Per_DEGREE = COUNTS_Per_REV/((240)/WHEEL_DIAMETER);
     //configure motors
     private DcMotor left = null;
     private DcMotor right = null;
     private DcMotor lift = null;
     private Servo launch = null;
 
-    //set up encoders
-    static final double COUNTS_Per_REV    = 1140 ;
-    static final double WHEEL_DIAMETER = 4 ; //in inches
-    static final double COUNTS_Per_INCH = COUNTS_Per_REV/(WHEEL_DIAMETER*Math.PI);
-    static final double COUNTS_Per_DEGREE = (COUNTS_Per_REV/(WHEEL_DIAMETER/18))/360;
-
-    //set speed
-    static final double speed = .5 ;
-
+    //st up time
     ElapsedTime runTime = new ElapsedTime();
     double checkpoint1 = 10;
 
+    //set speed
+    static final double speed = .3 ;
 
     public void sample() {
         runTime.reset();
         initVuforia();
         initTfod();
         tfod.activate();
-
+        moveForward(5);
         goldLocation = "N";
         while (goldLocation == "N" && runTime.time() < checkpoint1) {
             if (tfod != null) {
@@ -66,10 +71,10 @@ public class BetaFar extends LinearOpMode {
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                 if (updatedRecognitions != null) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
+                    telemetry.addData("goldlocation",goldLocation );
+
                     if (updatedRecognitions.size() == 2) {
-                        int goldMineralX = -1;
-                        int silverMineral1X = -1;
-                        int silverMineral2X = -1;
+
                         for (Recognition recognition : updatedRecognitions) {
                             if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
                                 goldMineralX = (int) recognition.getLeft();
@@ -84,16 +89,16 @@ public class BetaFar extends LinearOpMode {
                             goldLocation = "L";
                             break;
                         }
-                        if (silverMineral1X != -1 && goldMineralX != -1) {
+                        if (goldMineralX != -1) {
                             if (goldMineralX < silverMineral1X) {
-                                telemetry.addData("Gold Mineral Position", "Left");
+                                telemetry.addData("Gold Mineral Position", "Center");
                                 goldLocation = "C";
                                 break;
                             }
                         }
-                        if (silverMineral1X != -1 && goldMineralX != -1) {
+                        if (goldMineralX != -1) {
                             if (goldMineralX > silverMineral1X) {
-                                telemetry.addData("Gold Mineral Position", "Left");
+                                telemetry.addData("Gold Mineral Position", "Right");
                                 goldLocation = "R";
                                 break;
                             }
@@ -107,6 +112,9 @@ public class BetaFar extends LinearOpMode {
         }
         //Four endings for this story: left, right, center, nothing
     }
+
+
+
 
     private void initVuforia() {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
@@ -127,18 +135,20 @@ public class BetaFar extends LinearOpMode {
     private void configureMotors() {
 
         left = hardwareMap.get(DcMotor.class, "mot0");
-         right = hardwareMap.get(DcMotor.class, "mot1");
-         lift = hardwareMap.get(DcMotor.class,"mot2");
-         launch = hardwareMap.get(Servo.class,"ser");
+        right = hardwareMap.get(DcMotor.class, "mot1");
+        lift = hardwareMap.get(DcMotor.class,"mot2");
+        launch = hardwareMap.get(Servo.class,"ser");
         //set rotational direction
 
-         left.setDirection(DcMotor.Direction.REVERSE);
-         right.setDirection(DcMotor.Direction.FORWARD);
-         lift.setDirection(DcMotor.Direction.FORWARD);
+        left.setDirection(DcMotor.Direction.REVERSE);
+        right.setDirection(DcMotor.Direction.FORWARD);
+        lift.setDirection(DcMotor.Direction.FORWARD);
+        launch.setDirection(Servo.Direction.REVERSE);
 
 
         waitForStart();
     }
+
 
     public void moveForward(double dX){//dx means displacement in inches
         runTime.reset();
@@ -154,6 +164,9 @@ public class BetaFar extends LinearOpMode {
         while (left.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());
+            telemetry.addData("goldlocation",goldLocation );
+            telemetry.addData("gold value",goldMineralX );
+            telemetry.addData("silver value",silverMineral1X );
             telemetry.update();
         }
         left.setPower(0);
@@ -188,8 +201,8 @@ public class BetaFar extends LinearOpMode {
         left.setTargetPosition((int)(dA * COUNTS_Per_DEGREE));
         right.setTargetPosition((int)(-dA * COUNTS_Per_DEGREE));
 
-        left.setPower(.5);//power depends on the the robot and case studies are needed
-        right.setPower(-.5);
+        left.setPower(speed);//power depends on the the robot and case studies are needed
+        right.setPower(-speed);
         while (left.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());
@@ -209,7 +222,7 @@ public class BetaFar extends LinearOpMode {
 
         left.setPower(-.5);//power depends on the the robot and case studies are needed
         right.setPower(.5);
-        while (left.isBusy()){
+        while (right.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());
             telemetry.update();
@@ -225,30 +238,25 @@ public class BetaFar extends LinearOpMode {
 
         if (location == "L") {
 
+            turnCounterClockwise(45-2);
+            moveForward(32);
 
         }
         if (location == "R") {
-            turnClockwise(45);
-            moveForward(24);
 
+            turnClockwise(45-6);
+            moveForward(34);
         }
         if (location == "C" ||location == "N") {
-            turnClockwise(45);
-            moveForward(24);//in
-            moveBackward(24);//out
 
-
-
+            moveForward(42);
 
         }
     }
 
     private void homeRun() {
-
-        moveForward(47);
-        turnCounterClockwise(45);
-        moveForward(35);
-        launch.setPosition(220);
+        //launch.setPosition(-.6);
+        //launch.setPosition(0);
     }
 
 
@@ -259,9 +267,9 @@ public class BetaFar extends LinearOpMode {
         bat(goldLocation);
         homeRun();
 
-        }
-
     }
+
+}
 
 
 

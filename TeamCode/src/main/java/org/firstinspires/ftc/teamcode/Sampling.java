@@ -10,11 +10,12 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
+import com.vuforia.CameraDevice;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCharacteristics;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -23,9 +24,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 @Disabled
-@Autonomous(name = "Near-1", group = "Beta")
+@Autonomous(name = "Sampling-1", group = "Beta")
 
-public class BetaNear extends LinearOpMode {
+public class Sampling extends LinearOpMode {
     //preparation for these cool vuforia stuffs
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
@@ -62,9 +63,9 @@ public class BetaNear extends LinearOpMode {
         initVuforia();
         initTfod();
         tfod.activate();
-        moveForward(5);
+
         goldLocation = "N";
-        while (opModeIsActive()&&goldLocation == "N" && runTime.time() < checkpoint1) {
+        while (goldLocation == "N" && runTime.time() < checkpoint1) {
             if (tfod != null) {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
@@ -121,6 +122,8 @@ public class BetaNear extends LinearOpMode {
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
+        CameraDevice.getInstance().setFocusMode(1);
+
     }
 
     private void initTfod() {
@@ -161,7 +164,7 @@ public class BetaNear extends LinearOpMode {
 
         left.setPower(speed);
         right.setPower(speed);
-        while (opModeIsActive()&&left.isBusy()){
+        while (left.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());
             telemetry.addData("goldlocation",goldLocation );
@@ -184,7 +187,7 @@ public class BetaNear extends LinearOpMode {
 
         left.setPower(-speed);
         right.setPower(-speed);
-        while (opModeIsActive()&&left.isBusy()){
+        while (left.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());
             telemetry.update();
@@ -203,7 +206,7 @@ public class BetaNear extends LinearOpMode {
 
         left.setPower(speed);//power depends on the the robot and case studies are needed
         right.setPower(-speed);
-        while (opModeIsActive()&&left.isBusy()){
+        while (left.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());
             telemetry.update();
@@ -222,7 +225,7 @@ public class BetaNear extends LinearOpMode {
 
         left.setPower(-.5);//power depends on the the robot and case studies are needed
         right.setPower(.5);
-        while (opModeIsActive()&&right.isBusy()){
+        while (right.isBusy()){
             telemetry.addData("Left",left.getCurrentPosition());
             telemetry.addData("Right",right.getCurrentPosition());
             telemetry.update();
@@ -240,26 +243,23 @@ public class BetaNear extends LinearOpMode {
 
             turnCounterClockwise(45-2);
             moveForward(32);
-            turnClockwise(90-28);
-            moveForward(34);
+
         }
         if (location == "R") {
 
             turnClockwise(45-6);
             moveForward(34);
-            turnCounterClockwise(90+5);
-            moveForward(34);
         }
         if (location == "C" ||location == "N") {
 
-            moveForward(41);
+            moveForward(42);
 
         }
     }
 
     private void homeRun() {
-        launch.setPosition(-.6);
-        launch.setPosition(0);
+        //launch.setPosition(-.6);
+        //launch.setPosition(0);
     }
 
 

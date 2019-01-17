@@ -23,8 +23,8 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.List;
 
-@Disabled
-@Autonomous(name = "Sampling-1", group = "Beta")
+
+@Autonomous(name = "Just Sampling", group = "Beta")
 
 public class Sampling extends LinearOpMode {
     //preparation for these cool vuforia stuffs
@@ -39,33 +39,14 @@ public class Sampling extends LinearOpMode {
     int silverMineral1X = -1;
     int silverMineral2X = -1;
 
-
-    //set up encoders
-    static final double COUNTS_Per_REV    = 1160 ;
-    static final double WHEEL_DIAMETER = 4 ; //in inches
-    static final double COUNTS_Per_INCH = COUNTS_Per_REV/(WHEEL_DIAMETER*Math.PI);
-    static final double COUNTS_Per_DEGREE = COUNTS_Per_REV/((240)/WHEEL_DIAMETER);
-    //configure motors
-    private DcMotor left = null;
-    private DcMotor right = null;
-    private DcMotor lift = null;
-    private Servo launch = null;
-
-    //st up time
-    ElapsedTime runTime = new ElapsedTime();
-    double checkpoint1 = 10;
-
-    //set speed
-    static final double speed = .3 ;
-
     public void sample() {
-        runTime.reset();
+
         initVuforia();
         initTfod();
         tfod.activate();
 
         goldLocation = "N";
-        while (goldLocation == "N" && runTime.time() < checkpoint1) {
+        while (opModeIsActive() ) {
             if (tfod != null) {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
@@ -78,11 +59,11 @@ public class Sampling extends LinearOpMode {
 
                         for (Recognition recognition : updatedRecognitions) {
                             if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldMineralX = (int) recognition.getLeft();
+                                goldMineralX = (int) recognition.getTop();
                             } else if (silverMineral1X == -1) {
-                                silverMineral1X = (int) recognition.getLeft();
+                                silverMineral1X = (int) recognition.getTop();
                             } else {
-                                silverMineral2X = (int) recognition.getLeft();
+                                silverMineral2X = (int) recognition.getTop();
                             }
                         }
                         if (silverMineral1X != -1 && silverMineral2X != -1) {
@@ -132,144 +113,12 @@ public class Sampling extends LinearOpMode {
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
-    }
-
-
-    private void configureMotors() {
-
-        left = hardwareMap.get(DcMotor.class, "mot0");
-        right = hardwareMap.get(DcMotor.class, "mot1");
-        lift = hardwareMap.get(DcMotor.class,"mot2");
-        launch = hardwareMap.get(Servo.class,"ser");
-        //set rotational direction
-
-        left.setDirection(DcMotor.Direction.REVERSE);
-        right.setDirection(DcMotor.Direction.FORWARD);
-        lift.setDirection(DcMotor.Direction.FORWARD);
-        launch.setDirection(Servo.Direction.REVERSE);
-
-
-        waitForStart();
-    }
-
-
-    public void moveForward(double dX){//dx means displacement in inches
-        runTime.reset();
-        left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        right.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        left.setTargetPosition((int)(dX * COUNTS_Per_INCH));
-        right.setTargetPosition((int)(dX * COUNTS_Per_INCH));
-
-        left.setPower(speed);
-        right.setPower(speed);
-        while (left.isBusy()){
-            telemetry.addData("Left",left.getCurrentPosition());
-            telemetry.addData("Right",right.getCurrentPosition());
-            telemetry.addData("goldlocation",goldLocation );
-            telemetry.addData("gold value",goldMineralX );
-            telemetry.addData("silver value",silverMineral1X );
-            telemetry.update();
-        }
-        left.setPower(0);
-        right.setPower(0);
-    }
-
-    public void moveBackward(double dX){//dx means displacement in inches
-        runTime.reset();
-        left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        right.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        left.setTargetPosition((int)(dX * COUNTS_Per_INCH));
-        right.setTargetPosition((int)(dX * COUNTS_Per_INCH));
-
-        left.setPower(-speed);
-        right.setPower(-speed);
-        while (left.isBusy()){
-            telemetry.addData("Left",left.getCurrentPosition());
-            telemetry.addData("Right",right.getCurrentPosition());
-            telemetry.update();
-        }
-        left.setPower(0);
-        right.setPower(0);
-    }
-    public void turnClockwise(double dA){//dx means displacement
-        runTime.reset();
-        left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        right.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        left.setTargetPosition((int)(dA * COUNTS_Per_DEGREE));
-        right.setTargetPosition((int)(-dA * COUNTS_Per_DEGREE));
-
-        left.setPower(speed);//power depends on the the robot and case studies are needed
-        right.setPower(-speed);
-        while (left.isBusy()){
-            telemetry.addData("Left",left.getCurrentPosition());
-            telemetry.addData("Right",right.getCurrentPosition());
-            telemetry.update();
-        }
-        left.setPower(0);
-        right.setPower(0);
-    }
-    public void turnCounterClockwise(double dA){//dx means displacement
-        runTime.reset();
-        left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        right.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        left.setTargetPosition((int)(-dA * COUNTS_Per_DEGREE));
-        right.setTargetPosition((int)(dA * COUNTS_Per_DEGREE));
-
-        left.setPower(-.5);//power depends on the the robot and case studies are needed
-        right.setPower(.5);
-        while (right.isBusy()){
-            telemetry.addData("Left",left.getCurrentPosition());
-            telemetry.addData("Right",right.getCurrentPosition());
-            telemetry.update();
-        }
-        left.setPower(0);
-        right.setPower(0);
-    }
-    private void pitch() {//pitch the ball means game starts. lower down, leave the latch, come up right in front of the mineral
 
     }
-
-    private void bat(String location) {
-
-        if (location == "L") {
-
-            turnCounterClockwise(45-2);
-            moveForward(32);
-
-        }
-        if (location == "R") {
-
-            turnClockwise(45-6);
-            moveForward(34);
-        }
-        if (location == "C" ||location == "N") {
-
-            moveForward(42);
-
-        }
-    }
-
-    private void homeRun() {
-        //launch.setPosition(-.6);
-        //launch.setPosition(0);
-    }
-
 
     @Override
     public void runOpMode() {
-        configureMotors();
         sample();
-        bat(goldLocation);
-        homeRun();
-
     }
 
 }

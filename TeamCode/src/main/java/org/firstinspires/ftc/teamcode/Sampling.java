@@ -5,17 +5,11 @@
  * */
 
 package org.firstinspires.ftc.teamcode;
-
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.Servo;
-import com.qualcomm.robotcore.util.ElapsedTime;
-import com.vuforia.CameraDevice;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
-import org.firstinspires.ftc.robotcore.external.hardware.camera.CameraCharacteristics;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -24,7 +18,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 
-@Autonomous(name = "Just Sampling", group = "Beta")
+@Autonomous(name = "Sampling", group = "Beta")
 
 public class Sampling extends LinearOpMode {
     //preparation for these cool vuforia stuffs
@@ -39,6 +33,8 @@ public class Sampling extends LinearOpMode {
     int silverMineral1X = -1;
     int silverMineral2X = -1;
 
+
+
     public void sample() {
 
         initVuforia();
@@ -46,54 +42,62 @@ public class Sampling extends LinearOpMode {
         tfod.activate();
 
         goldLocation = "N";
-        while (opModeIsActive() ) {
+        while (opModeIsActive()) {
+
+
             if (tfod != null) {
                 // getUpdatedRecognitions() will return null if no new information is available since
                 // the last time that call was made.
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                 if (updatedRecognitions != null) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
-                    telemetry.addData("goldlocation",goldLocation );
+                    telemetry.addData("goldlocation", goldLocation);
 
-                    if (updatedRecognitions.size() == 2) {
+                    for (Recognition recognition : updatedRecognitions) {
 
-                        for (Recognition recognition : updatedRecognitions) {
-                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                                goldMineralX = (int) recognition.getTop();
-                            } else if (silverMineral1X == -1) {
-                                silverMineral1X = (int) recognition.getTop();
-                            } else {
-                                silverMineral2X = (int) recognition.getTop();
-                            }
+                        if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                            goldMineralX = (int) recognition.getLeft();
+                        } else if (silverMineral1X == -1) {
+                            silverMineral1X = (int) recognition.getLeft();
+                        } else if (silverMineral2X == -1){
+                            silverMineral2X = (int) recognition.getLeft();
+                        }
+                        else{
+                            goldMineralX = 0;
+                            silverMineral1X = 0;
+                            silverMineral2X = 0;
                         }
                         if (silverMineral1X != -1 && silverMineral2X != -1) {
                             telemetry.addData("Gold Mineral Position", "Left");
                             goldLocation = "L";
-                            break;
+
                         }
                         if (goldMineralX != -1) {
-                            if (goldMineralX < silverMineral1X) {
+                            if (goldMineralX < 650 ) {
                                 telemetry.addData("Gold Mineral Position", "Center");
                                 goldLocation = "C";
-                                break;
                             }
-                        }
-                        if (goldMineralX != -1) {
-                            if (goldMineralX > silverMineral1X) {
-                                telemetry.addData("Gold Mineral Position", "Right");
+                            else{
+                                telemetry.addData("Gold Mineral Position", "Center");
                                 goldLocation = "R";
-                                break;
                             }
                         }
-
-
                     }
+
+                    //threshhold is 650
+                    telemetry.addData("get left", goldMineralX);
+
+
+
+
                 }
                 telemetry.update();
             }
+
         }
         //Four endings for this story: left, right, center, nothing
     }
+
 
 
 
@@ -102,8 +106,10 @@ public class Sampling extends LinearOpMode {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
+        parameters.fillCameraMonitorViewParent = true;
+
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
-        CameraDevice.getInstance().setFocusMode(1);
+
 
     }
 
@@ -113,15 +119,21 @@ public class Sampling extends LinearOpMode {
         TFObjectDetector.Parameters tfodParameters = new TFObjectDetector.Parameters(tfodMonitorViewId);
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
-
     }
+
+
+
+
 
     @Override
     public void runOpMode() {
+
         sample();
+
     }
 
 }
+
 
 
 

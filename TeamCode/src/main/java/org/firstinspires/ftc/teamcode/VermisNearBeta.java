@@ -39,9 +39,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 
-@Autonomous(name = "Pulvis Near 2", group = "Beta")
+@Autonomous(name = "Vermis Near 2", group = "Beta")
 
-public class PulvisNearBeta extends LinearOpMode {
+public class VermisNearBeta extends LinearOpMode {
     //preparation for these cool vuforia stuffs
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";

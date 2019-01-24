@@ -1,9 +1,26 @@
-/*
+/**
  * Author: Benton Li '19
  * Version: 1.0
  *
  * */
 
+/**
+ * Sample() Introduction:
+ * When Vuforia and Tensor Flow are initialized, the camera will look for the cube first.
+ * The camera can only see two objects (center and right)
+ * If we find the cube, we fetch the cube's x-coordinate in the image.
+ *      If it's less than 650, then the cube is in the "center" (99% sure)
+ *      If it's more than 650, then the cube is on the "right"  (99% sure)
+ * If we can't find the cube, we look for the ball.
+ *      If there are two balls, then the cube is on the "right" (99% sure)
+ *      If there is only one ball, we fetch the ball's x-coordinate
+ *          If it's less than 650, then the cube is on the "right" (49% sure)
+ *              we assume we failed to detect the cube
+ *          If it's more than 650, then the cube is in the "center" (49% sure)
+ *              we assume we failed to detect the cube
+ *      If there is none, we are out of our luck and we'll guess.
+ *          the cube is in the "center" (33% sure)
+ */
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -22,9 +39,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 
-@Autonomous(name = "Beta Near 2", group = "Beta")
+@Autonomous(name = "Pulvis Near 2", group = "Beta")
 
-public class BetaNearV2 extends LinearOpMode {
+public class PulvisNearBeta extends LinearOpMode {
     //preparation for these cool vuforia stuffs
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
@@ -36,6 +53,7 @@ public class BetaNearV2 extends LinearOpMode {
     int goldMineralX = -1;
     int silverMineral1X = -1;
     int silverMineral2X = -1;
+    String confidence = "";
 
 
     //set up encoders
@@ -51,7 +69,7 @@ public class BetaNearV2 extends LinearOpMode {
 
     //st up time
     ElapsedTime runTime = new ElapsedTime();
-    double checkpoint1 = 10;
+    double checkpoint1 = 15;
 
     //set speed
     static final double speed = .3 ;
@@ -61,59 +79,60 @@ public class BetaNearV2 extends LinearOpMode {
         goldLocation = "N";
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        lift.setTargetPosition(-34327);
+        lift.setTargetPosition(-26000);
         lift.setPower(-1);
         initVuforia();
         initTfod();
         tfod.activate();
         while (opModeIsActive() && lift.isBusy()) {
-            telemetry.update();
-            telemetry.addData("Gold Location", goldLocation);
-            telemetry.addData("Lift ", lift.getCurrentPosition());
             if (tfod != null) {
                 List<Recognition> updatedRecognitions = tfod.getUpdatedRecognitions();
                 if (updatedRecognitions != null) {
                     telemetry.addData("# Object Detected", updatedRecognitions.size());
-                    telemetry.addData("goldlocation", goldLocation);
+                    telemetry.addData("Gold Mineral Position", goldLocation);
+                    telemetry.addData("Confidence", confidence);
+                    if (updatedRecognitions.size() == 2 || updatedRecognitions.size() == 1 ) {
+                        int goldMineralX = -1;
+                        int silverMineral1X = -1;
+                        for (Recognition recognition : updatedRecognitions) {
+                            if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
+                                goldMineralX = (int) recognition.getLeft();
+                                if (goldMineralX < 650) {
+                                    goldLocation = "C";
+                                    confidence = "99%";
+                                }
+                                else if (goldMineralX > 650) {
+                                    goldLocation = "R";
+                                    confidence = "99%";
+                                }
+                            } else if (silverMineral1X == -1) {
+                                silverMineral1X = (int) recognition.getLeft();
+                            } else {
+                                silverMineral2X = (int) recognition.getLeft();
+                            }
+                        }
 
-                    for (Recognition recognition : updatedRecognitions) {
-                        if (recognition.getLabel().equals(LABEL_GOLD_MINERAL)) {
-                            goldMineralX = (int) recognition.getLeft();
-                        } else if (silverMineral1X == -1) {
-                            silverMineral1X = (int) recognition.getLeft();
-                        } else {
-                            silverMineral2X = (int) recognition.getLeft();
+                        if (goldMineralX ==-1) {
+                            if (updatedRecognitions.size() == 2) {
+                                goldLocation = "L";
+                                confidence = "99%";
+                            }
+                            else if (silverMineral1X > 650) {
+                                goldLocation = "C";
+                                confidence = "49%";
+                            }
+                            else if(silverMineral1X != -1){
+                                goldLocation = "R";
+                                confidence = "49%";
+                            }
+                            else{
+                                goldLocation = "C";
+                                confidence = "33%";
+                            }
                         }
                     }
-                    if (goldMineralX != -1) {
-                        if (goldMineralX < 650) {
-
-                            goldLocation = "C";
-                            break;
-                        } else if (goldMineralX > 650) {
-
-                            goldLocation = "R";
-                            break;
-                        }
-                    } else if (silverMineral1X != -1) {
-                        if (silverMineral2X != -1) {
-
-                            goldLocation = "L";
-                            break;
-                        }
-                        else if (silverMineral1X > 650) {
-
-                            goldLocation = "C";
-                        }
-                        else {
-
-                            goldLocation = "R";
-                        }
-                    }
-
+                    telemetry.update();
                 }
-
-
             }
 
         }
@@ -121,14 +140,12 @@ public class BetaNearV2 extends LinearOpMode {
             //Four endings for this story: left, right, center, nothing
 
     }
-
     private void initVuforia() {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
         parameters.cameraDirection = CameraDirection.BACK;
         vuforia = ClassFactory.getInstance().createVuforia(parameters);
     }
-
     private void initTfod() {
         int tfodMonitorViewId = hardwareMap.appContext.getResources().getIdentifier(
                 "tfodMonitorViewId", "id", hardwareMap.appContext.getPackageName());

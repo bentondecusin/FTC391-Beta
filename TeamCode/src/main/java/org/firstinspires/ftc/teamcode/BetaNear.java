@@ -23,7 +23,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 @Disabled
-@Autonomous(name = "Near-1", group = "Beta")
+@Autonomous(name = "Vermis Near", group = "Beta")
 
 public class BetaNear extends LinearOpMode {
     //preparation for these cool vuforia stuffs
@@ -62,7 +62,7 @@ public class BetaNear extends LinearOpMode {
         initVuforia();
         initTfod();
         tfod.activate();
-        moveForward(5);
+        moveForward(7);
         goldLocation = "N";
         while (opModeIsActive()&&goldLocation == "N" && runTime.time() < checkpoint1) {
             if (tfod != null) {
@@ -243,14 +243,14 @@ public class BetaNear extends LinearOpMode {
             turnClockwise(90-28);
             moveForward(34);
         }
-        if (location == "R") {
+        if (location == "R" ||location == "N") {
 
             turnClockwise(45-6);
             moveForward(34);
             turnCounterClockwise(90+5);
             moveForward(34);
         }
-        if (location == "C" ||location == "N") {
+        if (location == "C" ) {
 
             moveForward(41);
 

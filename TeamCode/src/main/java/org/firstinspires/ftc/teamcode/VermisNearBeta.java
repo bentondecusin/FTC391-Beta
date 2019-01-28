@@ -1,6 +1,6 @@
 /**
  * Author: Benton Li '19
- * Version: 1.0
+ * Version: 2.0
  *
  * */
 
@@ -23,6 +23,7 @@
  */
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -31,6 +32,10 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.ClassFactory;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer;
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaLocalizer.CameraDirection;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
@@ -42,7 +47,7 @@ import java.util.List;
 @Autonomous(name = "Vermis Near 2", group = "Beta")
 
 public class VermisNearBeta extends LinearOpMode {
-    //preparation for these cool vuforia stuffs
+    //vuforia thingy
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
     private static final String LABEL_SILVER_MINERAL = "Silver Mineral";
@@ -54,6 +59,11 @@ public class VermisNearBeta extends LinearOpMode {
     int silverMineral1X = -1;
     int silverMineral2X = -1;
     String confidence = "";
+
+    //IMU thingy
+    BNO055IMU imu;
+    Orientation lastAngles = new Orientation();
+    double direction;
 
 
     //set up encoders
@@ -81,6 +91,8 @@ public class VermisNearBeta extends LinearOpMode {
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setTargetPosition(-26000);
         lift.setPower(-1);
+        //while landing, initialize vuforia and imu
+        initIMU();
         initVuforia();
         initTfod();
         tfod.activate();
@@ -140,6 +152,8 @@ public class VermisNearBeta extends LinearOpMode {
             //Four endings for this story: left, right, center, nothing
 
     }
+
+    //--------------------------Vuforia&Tfod---------------------------------------Start
     private void initVuforia() {
         VuforiaLocalizer.Parameters parameters = new VuforiaLocalizer.Parameters();
         parameters.vuforiaLicenseKey = VUFORIA_KEY;
@@ -153,8 +167,9 @@ public class VermisNearBeta extends LinearOpMode {
         tfod = ClassFactory.getInstance().createTFObjectDetector(tfodParameters, vuforia);
         tfod.loadModelFromAsset(TFOD_MODEL_ASSET, LABEL_GOLD_MINERAL, LABEL_SILVER_MINERAL);
     }
+    //--------------------------Vuforia&Tfod---------------------------------------End
 
-
+    //--------------------------Motor, servo, encoder---------------------------------------Start
     private void configureMotors() {
 
         left = hardwareMap.get(DcMotor.class, "mot0");
@@ -167,12 +182,11 @@ public class VermisNearBeta extends LinearOpMode {
         right.setDirection(DcMotor.Direction.FORWARD);
         lift.setDirection(DcMotor.Direction.FORWARD);
         launch.setDirection(Servo.Direction.REVERSE);
-
-
         waitForStart();
     }
+    //--------------------------Motor, servo, encoder---------------------------------------End
 
-
+    //--------------------------Movement---------------------------------------Start
     public void moveForward(double dX){//dx means displacement in inches
         runTime.reset();
         left.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
@@ -255,6 +269,48 @@ public class VermisNearBeta extends LinearOpMode {
         left.setPower(0);
         right.setPower(0);
     }
+
+    //--------------------------Movement---------------------------------------Start
+
+
+//--------------------------IMU---------------------------------------Start
+
+    public void initIMU(){
+        BNO055IMU.Parameters parameters = new BNO055IMU.Parameters();
+        parameters.mode                = BNO055IMU.SensorMode.IMU;
+        parameters.angleUnit           = BNO055IMU.AngleUnit.DEGREES;
+        parameters.accelUnit           = BNO055IMU.AccelUnit.METERS_PERSEC_PERSEC;
+        parameters.loggingEnabled      = false;
+        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu.initialize(parameters);
+    }
+
+    public double getTargetAngle(double delta){
+        double direction;
+        direction = delta +1 - imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        if (direction < 0){
+            direction += 360;
+        }
+        else if(direction>360){
+            direction -= 360;
+        }
+        return direction;
+    }
+
+    private double getCurrentAngle()
+    {   double direction;
+        direction = 1-imu.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+        if (direction < 0){
+            direction += 360;
+        }
+        if (direction > 360){
+            direction -= 360;
+        }
+        return direction;
+    }
+
+    //--------------------------IMU---------------------------------------End
+
     private void pitch() {//pitch the ball means game starts. lower down, leave the latch, come up right in front of the mineral
 
     }

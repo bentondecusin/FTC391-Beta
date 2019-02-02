@@ -27,6 +27,7 @@ public class IMUNavigating extends LinearOpMode{
     BNO055IMU   imu;
     Orientation lastAngles = new Orientation();
     double direction;
+    double bufferAngle=5;
     @Override
     public void runOpMode() throws InterruptedException{
         initIMU();
@@ -38,7 +39,7 @@ public class IMUNavigating extends LinearOpMode{
     public void turnClockwise(double dA){
         double targetAngle, currentAngle ;
         currentAngle = getCurrentAngle();
-        targetAngle = getTargetAngle(dA);
+        targetAngle = getTargetAngle(dA-bufferAngle);
 
         //setPowerX
         while (opModeIsActive()&&(currentAngle>targetAngle) )
@@ -60,7 +61,7 @@ public class IMUNavigating extends LinearOpMode{
     public void turnCounterClockwise(double dA){
         double targetAngle, currentAngle ;
         currentAngle = getCurrentAngle();
-        targetAngle = getTargetAngle(-dA);
+        targetAngle = getTargetAngle(-dA+bufferAngle);
 
         //setPowerX
 

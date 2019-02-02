@@ -27,7 +27,6 @@ import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
@@ -44,9 +43,9 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 import java.util.List;
 
 
-@Autonomous(name = "Vermis Near", group = "Beta")
+@Autonomous(name = "Vermis Far", group = "Beta")
 
-public class VermisNearBeta extends LinearOpMode {
+public class VermisFarBeta extends LinearOpMode {
     //vuforia thingy
     private static final String TFOD_MODEL_ASSET = "RoverRuckus.tflite";
     private static final String LABEL_GOLD_MINERAL = "Gold Mineral";
@@ -344,17 +343,7 @@ public class VermisNearBeta extends LinearOpMode {
             turnClockwise(135);
             sleep(500);
             moveBackward(33);
-            turnCounterClockwise(90);
-            sleep(500);
-            moveForward(35);
-            sleep(500);
-            turnCounterClockwise(55);
-            sleep(500);
-            launch.setPosition(.6);
-            sleep(500);
 
-            turnClockwise(60);
-            sleep(500);
 
 
         }
@@ -362,23 +351,14 @@ public class VermisNearBeta extends LinearOpMode {
             turnClockwise(45);
             sleep(500);
             moveForward(41);
-            turnCounterClockwise(90);
-            sleep(500);
-            moveForward(35);
-            launch.setPosition(-.6);
-            sleep(500);
+
 
         }
         if (location == "C" ) {
             turnClockwise(180);
             sleep(500);
             moveBackward(46);
-            turnClockwise(135);
-            sleep(500);
-            launch.setPosition(-.6);
-            sleep(1000);
-            turnCounterClockwise(20);// we are using the wall as a tool
-            sleep(500);
+
 
 
 
@@ -427,7 +407,7 @@ public class VermisNearBeta extends LinearOpMode {
         land();
         sample();
         bat(goldLocation);
-        sprint();
+
 
 
 

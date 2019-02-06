@@ -76,11 +76,11 @@ public class BDriving extends OpMode{
 
         if(gamepad1.left_bumper == true){
 
-            gate.setPosition(.5); //open gate
+            gate.setPosition(1.2); //open gate
         }
         if(gamepad1.right_bumper == true){
 
-            gate.setPosition(1); //close gate. secure mineral
+            gate.setPosition(.2); //close gate. secure mineral
 
         }
 

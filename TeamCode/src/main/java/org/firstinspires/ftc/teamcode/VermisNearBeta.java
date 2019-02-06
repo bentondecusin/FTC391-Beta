@@ -81,6 +81,7 @@ public class VermisNearBeta extends LinearOpMode {
     double checkpoint1 = 4;
 
     public void land(){
+        gate.setPosition(1);
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         lift.setTargetPosition(25000);
@@ -189,7 +190,6 @@ public class VermisNearBeta extends LinearOpMode {
         right.setDirection(DcMotor.Direction.FORWARD);
         lift.setDirection(DcMotor.Direction.FORWARD);
         launch.setDirection(Servo.Direction.REVERSE);
-        gate.setPosition(1);
 
     }
     //--------------------------Motor, servo, encoder---------------------------------------End

@@ -13,7 +13,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
-@TeleOp(name="Beta Driving")
+@TeleOp(name="Beta Driving ")
 
 public class BDriving extends OpMode{
 
@@ -80,7 +80,7 @@ public class BDriving extends OpMode{
         }
         if(gamepad1.right_bumper == true){
 
-            gate.setPosition(.2); //close gate. secure mineral
+            gate.setPosition(.1); //close gate. secure mineral
 
         }
 

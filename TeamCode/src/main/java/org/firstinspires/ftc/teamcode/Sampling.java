@@ -35,7 +35,7 @@ import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
 
 import java.util.List;
 
-
+@Disabled
 @Autonomous(name = "Sampling ", group = "Beta")
 
 public class Sampling extends LinearOpMode {

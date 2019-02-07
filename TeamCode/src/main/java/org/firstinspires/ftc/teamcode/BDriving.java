@@ -74,11 +74,11 @@ public class BDriving extends OpMode{
             speedStatus = "Medium Speed";
         }
 
-        if(gamepad1.left_bumper == true){
-
-            gate.setPosition(1.2); //open gate
-        }
         if(gamepad1.right_bumper == true){
+
+            gate.setPosition(0.8); //open gate
+        }
+        if(gamepad1.left_bumper == true){
 
             gate.setPosition(.1); //close gate. secure mineral
 
@@ -99,7 +99,7 @@ public class BDriving extends OpMode{
         right.setPower(speed*(gamepad1.left_stick_y+gamepad1.right_stick_x));
         lift.setPower(gamepad1.left_trigger - gamepad1.right_trigger);
 
-        telemetry.addData("servo", gate.getPosition());
+        telemetry.addData("Gate Status", gate.getPosition());
         telemetry.addData("Speed:",speed);
         telemetry.addData("Speed Status",speedStatus);
 

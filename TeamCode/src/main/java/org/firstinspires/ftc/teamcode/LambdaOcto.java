@@ -9,22 +9,33 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
-@Disabled
+
 @TeleOp(name="Lambda-Octo")
 
 public class LambdaOcto extends LinearOpMode {
 
+    //time
     private ElapsedTime runtime = new ElapsedTime();
+
     //a bunch of motors
     private DcMotor leftFront = null;
     private DcMotor rightFront = null;
     private DcMotor leftBack = null;
     private DcMotor rightBack = null;
-    int p = 1; //default power
+    double p = 0.5; //default power
     float x = 0;//default x-coord
     float y = 0;//default y-coord
     String direction = "static";//default direction
     public void regulateSpeed(){
+        if (gamepad1.a==true){
+            p = 0.5;
+        }
+        if (gamepad1.b==true){
+            p = 1;
+        }
+        if (gamepad1.right_stick_button==true){
+            p = 0.2;
+        }
 
     }
     public String directionSetting(float x, float y/*the parameters are x and y*/){
@@ -140,10 +151,17 @@ public class LambdaOcto extends LinearOpMode {
 
     }
 
+
+
+
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+
+
+
         //configuration
         leftFront = hardwareMap.get(DcMotor.class, "mot0");
         leftBack = hardwareMap.get(DcMotor.class, "mot2");
@@ -165,6 +183,9 @@ public class LambdaOcto extends LinearOpMode {
             float vertical = - gamepad1.right_stick_y;//parameter vertical and sign conventional***
             direction = directionSetting(horizontal,vertical);//input
             move();
+            regulateSpeed();
+            telemetry.addData("Current Speed:",p );
+            telemetry.update();
         }
         // Show the elapsed game time and wheel power.
 
